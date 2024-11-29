@@ -1,6 +1,5 @@
 {
   "name": "nix-docker-experiment",
-  "private": true,
   "type": "module",
   "scripts": {
     "build": "react-router build",
