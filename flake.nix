@@ -13,17 +13,47 @@
           inherit system;
           config = { };
         };
-        nixpkgs-24-05 = import inputs.nixpkgs-24-05 nixpkgsArgs;
+        pkgs = import inputs.nixpkgs-24-05 nixpkgsArgs;
+        nodejs = pkgs.nodejs_22;
+        pnpm = pkgs.pnpm_9;
+        typescript = pkgs.typescript;
+
+        bin = pkgs.stdenv.mkDerivation (finalAttrs: rec {
+          pname = "nix-docker-experiment";
+          version = "0.0.0";
+          src = ./.;
+          nativeBuildInputs = [
+            nodejs
+            pnpm.configHook
+          ];
+          buildPhase = ''pnpm build'';
+          installPhase = ''
+            mkdir -p $out/bin
+            cp -r ./build/* $out/bin
+          '';
+          pnpmDeps = pnpm.fetchDeps {
+            inherit pname version src;
+            hash = "sha256-3VpHNvu2N4gGmO+LtfNVOx1q1CZ/f4fGdOH8+PDi9U8=";
+          };
+        });
+
       in
-      rec {
+      # dockerImage = pkgs.dockerTools.buildImage {
+      #   name = "nix-docker-experiment";
+      #   tag = "latest";
+      #   copyToRoot = [ bin ];
+      #   config = {
+      #     Cmd = [ "${bin}/bin/nix-docker-experiment" ];
+      #   };
+      # };
+      {
         packages = {
-          nodejs = nixpkgs-24-05.nodejs_22;
-          pnpm = nixpkgs-24-05.pnpm;
-          typescript = nixpkgs-24-05.typescript;
+          default = bin;
         };
-        devShells.default = nixpkgs-24-05.mkShell {
+
+        devShells.default = pkgs.mkShell {
           name = "nix-docker-experiment";
-          buildInputs = with packages; [
+          buildInputs = [
             nodejs
             pnpm
             typescript

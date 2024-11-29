@@ -5,6 +5,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
+    "start:nix": "react-router-serve ./result/bin/build/server/index.js",
     "typecheck": "react-router typegen && tsc --build --noEmit"
   },
   "dependencies": {
